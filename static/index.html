@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Telegram Web App Clicker</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+</head>
+<body>
+    <h1>Clicker Game</h1>
+    <p id="score">Score: 0</p>
+    <button onclick="incrementScore()">Click Me!</button>
+
+    <script>
+        let tg = window.Telegram.WebApp;
+        tg.expand();
+
+        let userId = tg.initDataUnsafe.user.id;
+        let score = 0;
+
+        // Fetch the current score from the server
+        fetch(`/get_score?user_id=${userId}`)
+            .then(response => response.json())
+            .then(data => {
+                score = data.score;
+                document.getElementById('score').innerText = `Score: ${score}`;
+            });
+
+        function incrementScore() {
+            score += 1;
+            document.getElementById('score').innerText = `Score: ${score}`;
+            fetch(`/update_score?user_id=${userId}&score=${score}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status !== 'success') {
+                        alert('Failed to update score');
+                    }
+                });
+        }
+    </script>
+</body>
+</html>
